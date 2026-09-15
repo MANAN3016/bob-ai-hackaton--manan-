@@ -1,0 +1,1851 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>ChainGuard AI</title>
+
+<style>
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f7fb;
+        color: #172033;
+    }
+
+    header {
+        background: #101828;
+        color: white;
+        padding: 22px 5%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h1 {
+        font-size: 28px;
+    }
+
+    header p {
+        margin-top: 5px;
+        color: #b7c1d1;
+    }
+
+    .status {
+        font-weight: bold;
+        font-size: 13px;
+        color: #12b76a;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1400px;
+        margin: 30px auto;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background: white;
+        padding: 22px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    }
+
+    .card h3 {
+        color: #667085;
+        font-size: 14px;
+    }
+
+    .card p {
+        font-size: 32px;
+        font-weight: bold;
+        margin-top: 12px;
+    }
+
+    .critical {
+        border-left: 5px solid #d92d20;
+    }
+
+    .warning {
+        border-left: 5px solid #f79009;
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+        margin-bottom: 25px;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .panel h2 {
+        margin-bottom: 15px;
+    }
+
+    button {
+        border: none;
+        background: #175cd3;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 7px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        opacity: 0.85;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 13px 10px;
+        text-align: left;
+        border-bottom: 1px solid #eaecf0;
+    }
+
+    th {
+        color: #667085;
+        font-size: 13px;
+    }
+
+    .badge {
+        padding: 5px 9px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .badge-critical {
+        background: #fee4e2;
+        color: #b42318;
+    }
+
+    .badge-high {
+        background: #fef0c7;
+        color: #b54708;
+    }
+
+    .badge-medium {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .badge-low {
+        background: #ecfdf3;
+        color: #027a48;
+    }
+
+    .disruption {
+        padding: 15px;
+        margin: 12px 0;
+        border-radius: 8px;
+        background: #f9fafb;
+        border-left: 4px solid #d92d20;
+    }
+
+    .disruption strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .ai-panel {
+        margin-top: 25px;
+    }
+
+    .description {
+        color: #667085;
+        margin: 8px 0 20px;
+    }
+
+    .questions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .questions button {
+        background: #344054;
+    }
+
+    .chat {
+        display: flex;
+        gap: 10px;
+    }
+
+    .chat input {
+        flex: 1;
+        padding: 13px;
+        border: 1px solid #d0d5dd;
+        border-radius: 7px;
+        font-size: 15px;
+    }
+
+    .answer {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f2f4f7;
+        border-radius: 10px;
+        white-space: pre-line;
+        line-height: 1.7;
+        min-height: 100px;
+    }
+
+    .fleet-list,
+    .cold-list {
+        margin-top: 15px;
+    }
+
+    .fleet-item,
+    .cold-item {
+        padding: 12px;
+        margin: 8px 0;
+        background: #f9fafb;
+        border-radius: 8px;
+    }
+
+    .normal {
+        color: #027a48;
+        font-weight: bold;
+    }
+
+    .warning-text {
+        color: #b54708;
+        font-weight: bold;
+    }
+
+    .critical-text {
+        color: #b42318;
+        font-weight: bold;
+    }
+
+    footer {
+        text-align: center;
+        padding: 30px;
+        color: #667085;
+    }
+
+    @media (max-width: 1000px) {
+
+        .cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+
+        header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            width: 95%;
+        }
+
+        .panel {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 650px;
+        }
+
+        .chat {
+            flex-direction: column;
+        }
+
+        .questions {
+            flex-direction: column;
+        }
+    }
+
+</style>
+
+</head><body><header><div>
+
+    <h1>ChainGuard AI</h1>
+
+    <p>
+        Supply Chain Intelligence & AI Copilot
+    </p>
+
+</div>
+
+<div class="status">
+    ● SYSTEM ONLINE
+</div>
+
+</header><div class="container"><!-- DASHBOARD CARDS -->
+
+<section class="cards">
+
+    <div class="card">
+
+        <h3>Total Shipments</h3>
+
+        <p id="totalShipments">
+            0
+        </p>
+
+    </div>
+
+
+    <div class="card critical">
+
+        <h3>Critical</h3>
+
+        <p id="criticalShipments">
+            0
+        </p>
+
+    </div>
+
+
+    <div class="card warning">
+
+        <h3>High Risk</h3>
+
+        <p id="highRisk">
+            0
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>Idle Fleet</h3>
+
+        <p id="idleFleet">
+            0
+        </p>
+
+    </div>
+
+
+    <div class="card critical">
+
+        <h3>Cold Chain Alerts</h3>
+
+        <p id="coldAlerts">
+            0
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- SHIPMENTS + DISRUPTIONS -->
+
+<section class="main-grid">
+
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <h2>
+                Shipment Risk Monitor
+            </h2>
+
+            <button onclick="loadShipments()">
+                Refresh
+            </button>
+
+        </div>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Shipment
+                    </th>
+
+                    <th>
+                        Route
+                    </th>
+
+                    <th>
+                        Priority
+                    </th>
+
+                    <th>
+                        Risk
+                    </th>
+
+                    <th>
+                        Score
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="shipmentTable">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+
+    <div class="panel">
+
+        <h2>
+            Active Disruptions
+        </h2>
+
+        <div id="disruptions">
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- FLEET -->
+
+<section class="panel">
+
+    <h2>
+        Fleet Status
+    </h2>
+
+    <div
+        id="fleetList"
+        class="fleet-list">
+    </div>
+
+</section>
+
+
+
+<!-- COLD CHAIN -->
+
+<section class="panel">
+
+    <h2>
+        Cold-Chain Monitoring
+    </h2>
+
+    <div
+        id="coldChainList"
+        class="cold-list">
+    </div>
+
+</section>
+
+
+
+<!-- AI COPILOT -->
+
+<section class="panel ai-panel">
+
+    <h2>
+        🤖 IBM Bob AI Copilot
+    </h2>
+
+    <p class="description">
+
+        Ask ChainGuard AI about your supply chain.
+
+    </p>
+
+
+    <div class="questions">
+
+
+        <button
+            onclick="askQuestion(
+            'Which shipments are at highest risk?'
+            )">
+
+            Highest Risk Shipments
+
+        </button>
+
+
+        <button
+            onclick="askQuestion(
+            'Which trucks are idle?'
+            )">
+
+            Idle Fleet
+
+        </button>
+
+
+        <button
+            onclick="askQuestion(
+            'Show me cold-chain violations.'
+            )">
+
+            Cold-Chain Alerts
+
+        </button>
+
+
+        <button
+            onclick="askQuestion(
+            'Which shipments are affected by disruption?'
+            )">
+
+            Disrupted Shipments
+
+        </button>
+
+
+        <button
+            onclick="askQuestion(
+            'What should we reroute first?'
+            )">
+
+            Rerouting
+
+        </button>
+
+
+    </div>
+
+
+
+    <div class="chat">
+
+        <input
+            type="text"
+            id="question"
+            placeholder="Ask a supply-chain question..."
+            onkeydown="handleEnter(event)"
+        >
+
+
+        <button onclick="sendQuestion()">
+
+            Ask Bob
+
+        </button>
+
+    </div>
+
+
+
+    <div
+        id="answer"
+        class="answer">
+
+        Ask a question to get an AI recommendation.
+
+    </div>
+
+</section>
+
+</div><footer><p>
+    ChainGuard AI • IBM Bob AI Hackathon 2026
+</p>
+
+</footer><script>
+
+
+/* =========================================
+   SHIPMENT DATA
+========================================= */
+
+const shipments = [
+
+    {
+        shipment_id: "SH-1001",
+        origin: "Mumbai",
+        destination: "Delhi",
+        priority: "High",
+        cargo_type: "Electronics",
+        delay_hours: 8,
+        disruption_id: "D-001"
+    },
+
+    {
+        shipment_id: "SH-1002",
+        origin: "Pune",
+        destination: "Ahmedabad",
+        priority: "Medium",
+        cargo_type: "Automotive Parts",
+        delay_hours: 3,
+        disruption_id: ""
+    },
+
+    {
+        shipment_id: "SH-1003",
+        origin: "Mumbai",
+        destination: "Bangalore",
+        priority: "Critical",
+        cargo_type: "Cold-Chain",
+        delay_hours: 15,
+        disruption_id: "D-001"
+    },
+
+    {
+        shipment_id: "SH-1004",
+        origin: "Chennai",
+        destination: "Hyderabad",
+        priority: "Low",
+        cargo_type: "General Cargo",
+        delay_hours: 2,
+        disruption_id: ""
+    },
+
+    {
+        shipment_id: "SH-1005",
+        origin: "Kolkata",
+        destination: "Mumbai",
+        priority: "High",
+        cargo_type: "Cold-Chain",
+        delay_hours: 12,
+        disruption_id: "D-002"
+    },
+
+    {
+        shipment_id: "SH-1006",
+        origin: "Delhi",
+        destination: "Jaipur",
+        priority: "Medium",
+        cargo_type: "Textiles",
+        delay_hours: 5,
+        disruption_id: ""
+    },
+
+    {
+        shipment_id: "SH-1007",
+        origin: "Ahmedabad",
+        destination: "Mumbai",
+        priority: "Critical",
+        cargo_type: "Pharmaceuticals",
+        delay_hours: 14,
+        disruption_id: "D-002"
+    },
+
+    {
+        shipment_id: "SH-1008",
+        origin: "Surat",
+        destination: "Delhi",
+        priority: "High",
+        cargo_type: "Electronics",
+        delay_hours: 7,
+        disruption_id: "D-001"
+    }
+
+];
+
+
+
+/* =========================================
+   DISRUPTION DATA
+========================================= */
+
+const disruptions = [
+
+    {
+        disruption_id: "D-001",
+        type: "Port Congestion",
+        location: "Mumbai Port",
+        severity: "High",
+        status: "Active"
+    },
+
+    {
+        disruption_id: "D-002",
+        type: "Severe Weather",
+        location: "Western India",
+        severity: "Critical",
+        status: "Active"
+    }
+
+];
+
+
+
+/* =========================================
+   FLEET DATA
+========================================= */
+
+const fleet = [
+
+    {
+        asset_id: "TRUCK-101",
+        asset_type: "Refrigerated Truck",
+        location: "Mumbai",
+        status: "Idle"
+    },
+
+    {
+        asset_id: "TRUCK-102",
+        asset_type: "Container Truck",
+        location: "Delhi",
+        status: "Active"
+    },
+
+    {
+        asset_id: "TRUCK-103",
+        asset_type: "Refrigerated Truck",
+        location: "Ahmedabad",
+        status: "Idle"
+    },
+
+    {
+        asset_id: "TRUCK-104",
+        asset_type: "Container Truck",
+        location: "Pune",
+        status: "Active"
+    },
+
+    {
+        asset_id: "TRUCK-105",
+        asset_type: "Container Truck",
+        location: "Surat",
+        status: "Idle"
+    }
+
+];
+
+
+
+/* =========================================
+   TEMPERATURE DATA
+========================================= */
+
+const temperatures = [
+
+    {
+        shipment_id: "SH-1003",
+        sensor_id: "TEMP-001",
+        temperature: 9.5,
+        min_temperature: 2,
+        max_temperature: 8
+    },
+
+    {
+        shipment_id: "SH-1005",
+        sensor_id: "TEMP-002",
+        temperature: 6.5,
+        min_temperature: 2,
+        max_temperature: 8
+    },
+
+    {
+        shipment_id: "SH-1007",
+        sensor_id: "TEMP-003",
+        temperature: 10.2,
+        min_temperature: 2,
+        max_temperature: 8
+    }
+
+];
+
+
+
+/* =========================================
+   RISK CALCULATION
+========================================= */
+
+function calculateRisk(shipment) {
+
+    let score = 0;
+
+    let reasons = [];
+
+
+    if (shipment.priority === "Critical") {
+
+        score += 40;
+
+        reasons.push(
+            "critical shipment priority"
+        );
+
+    }
+
+    else if (shipment.priority === "High") {
+
+        score += 30;
+
+        reasons.push(
+            "high shipment priority"
+        );
+
+    }
+
+    else if (shipment.priority === "Medium") {
+
+        score += 20;
+
+    }
+
+
+
+    if (shipment.disruption_id !== "") {
+
+        score += 30;
+
+        reasons.push(
+            "active supply-chain disruption"
+        );
+
+    }
+
+
+
+    if (shipment.cargo_type === "Cold-Chain") {
+
+        score += 15;
+
+        reasons.push(
+            "temperature-sensitive cargo"
+        );
+
+    }
+
+
+
+    if (shipment.delay_hours >= 12) {
+
+        score += 20;
+
+        reasons.push(
+            "high expected delay"
+        );
+
+    }
+
+    else if (shipment.delay_hours >= 6) {
+
+        score += 10;
+
+        reasons.push(
+            "moderate expected delay"
+        );
+
+    }
+
+
+
+    let level;
+
+
+    if (score >= 70) {
+
+        level = "CRITICAL";
+
+    }
+
+    else if (score >= 50) {
+
+        level = "HIGH";
+
+    }
+
+    else if (score >= 30) {
+
+        level = "MEDIUM";
+
+    }
+
+    else {
+
+        level = "LOW";
+
+    }
+
+
+    return {
+        score: score,
+        level: level,
+        reasons: reasons
+    };
+
+}
+
+
+
+/* =========================================
+   LOAD DASHBOARD
+========================================= */
+
+function loadDashboard() {
+
+
+    let riskData = shipments.map(
+        shipment => {
+
+            const risk =
+                calculateRisk(shipment);
+
+            return {
+
+                ...shipment,
+
+                risk_score:
+                    risk.score,
+
+                risk_level:
+                    risk.level,
+
+                reasons:
+                    risk.reasons
+
+            };
+
+        }
+    );
+
+
+
+    const critical =
+        riskData.filter(
+            x => x.risk_level === "CRITICAL"
+        ).length;
+
+
+
+    const high =
+        riskData.filter(
+            x => x.risk_level === "HIGH"
+        ).length;
+
+
+
+    const idle =
+        fleet.filter(
+            x => x.status === "Idle"
+        ).length;
+
+
+
+    const coldAlerts =
+        temperatures.filter(
+            item =>
+                item.temperature <
+                item.min_temperature ||
+
+                item.temperature >
+                item.max_temperature
+        ).length;
+
+
+
+    document.getElementById(
+        "totalShipments"
+    ).textContent =
+        shipments.length;
+
+
+
+    document.getElementById(
+        "criticalShipments"
+    ).textContent =
+        critical;
+
+
+
+    document.getElementById(
+        "highRisk"
+    ).textContent =
+        high;
+
+
+
+    document.getElementById(
+        "idleFleet"
+    ).textContent =
+        idle;
+
+
+
+    document.getElementById(
+        "coldAlerts"
+    ).textContent =
+        coldAlerts;
+
+
+
+    displayDisruptions();
+
+    displayFleet();
+
+    displayColdChain();
+
+}
+
+
+
+/* =========================================
+   LOAD SHIPMENTS
+========================================= */
+
+function loadShipments() {
+
+
+    const table =
+        document.getElementById(
+            "shipmentTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+
+    shipments.forEach(
+        shipment => {
+
+
+            const risk =
+                calculateRisk(shipment);
+
+
+
+            const badgeClass =
+                "badge-" +
+                risk.level.toLowerCase();
+
+
+
+            const row =
+                document.createElement("tr");
+
+
+
+            row.innerHTML = `
+
+                <td>
+
+                    <strong>
+                        ${shipment.shipment_id}
+                    </strong>
+
+                </td>
+
+
+                <td>
+
+                    ${shipment.origin}
+
+                    →
+
+                    ${shipment.destination}
+
+                </td>
+
+
+                <td>
+
+                    ${shipment.priority}
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="badge ${badgeClass}"
+                    >
+
+                        ${risk.level}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    ${risk.score}
+
+                </td>
+
+            `;
+
+
+
+            table.appendChild(row);
+
+        }
+    );
+
+}
+
+
+
+/* =========================================
+   DISPLAY DISRUPTIONS
+========================================= */
+
+function displayDisruptions() {
+
+
+    const container =
+        document.getElementById(
+            "disruptions"
+        );
+
+
+    container.innerHTML = "";
+
+
+
+    disruptions.forEach(
+        item => {
+
+
+            const div =
+                document.createElement("div");
+
+
+
+            div.className =
+                "disruption";
+
+
+
+            div.innerHTML = `
+
+                <strong>
+                    ${item.type}
+                </strong>
+
+                Location:
+                ${item.location}
+
+                <br>
+
+                Severity:
+                ${item.severity}
+
+                <br>
+
+                Status:
+                ${item.status}
+
+            `;
+
+
+
+            container.appendChild(div);
+
+        }
+    );
+
+}
+
+
+
+/* =========================================
+   DISPLAY FLEET
+========================================= */
+
+function displayFleet() {
+
+
+    const container =
+        document.getElementById(
+            "fleetList"
+        );
+
+
+    container.innerHTML = "";
+
+
+
+    fleet.forEach(
+        asset => {
+
+
+            const div =
+                document.createElement("div");
+
+
+
+            div.className =
+                "fleet-item";
+
+
+
+            let statusClass =
+                asset.status === "Idle"
+                ? "warning-text"
+                : "normal";
+
+
+
+            div.innerHTML = `
+
+                <strong>
+                    ${asset.asset_id}
+                </strong>
+
+                <br>
+
+                Type:
+                ${asset.asset_type}
+
+                <br>
+
+                Location:
+                ${asset.location}
+
+                <br>
+
+                Status:
+
+                <span class="${statusClass}">
+                    ${asset.status}
+                </span>
+
+            `;
+
+
+
+            container.appendChild(div);
+
+        }
+    );
+
+}
+
+
+
+/* =========================================
+   DISPLAY COLD CHAIN
+========================================= */
+
+function displayColdChain() {
+
+
+    const container =
+        document.getElementById(
+            "coldChainList"
+        );
+
+
+    container.innerHTML = "";
+
+
+
+    temperatures.forEach(
+        item => {
+
+
+            let status;
+
+            let statusClass;
+
+
+
+            if (
+                item.temperature <
+                item.min_temperature ||
+
+                item.temperature >
+                item.max_temperature
+            ) {
+
+                status =
+                    "CRITICAL";
+
+                statusClass =
+                    "critical-text";
+
+            }
+
+            else if (
+                item.temperature <=
+                item.min_temperature + 1 ||
+
+                item.temperature >=
+                item.max_temperature - 1
+            ) {
+
+                status =
+                    "WARNING";
+
+                statusClass =
+                    "warning-text";
+
+            }
+
+            else {
+
+                status =
+                    "NORMAL";
+
+                statusClass =
+                    "normal";
+
+            }
+
+
+
+            const div =
+                document.createElement("div");
+
+
+
+            div.className =
+                "cold-item";
+
+
+
+            div.innerHTML = `
+
+                <strong>
+                    Shipment ${item.shipment_id}
+                </strong>
+
+                <br>
+
+                Sensor:
+                ${item.sensor_id}
+
+                <br>
+
+                Temperature:
+                ${item.temperature}°C
+
+                <br>
+
+                Safe Range:
+                ${item.min_temperature}°C
+                -
+                ${item.max_temperature}°C
+
+                <br>
+
+                Status:
+
+                <span class="${statusClass}">
+                    ${status}
+                </span>
+
+            `;
+
+
+
+            container.appendChild(div);
+
+        }
+    );
+
+}
+
+
+
+/* =========================================
+   AI COPILOT
+========================================= */
+
+function askQuestion(question) {
+
+
+    document.getElementById(
+        "question"
+    ).value = question;
+
+
+
+    sendQuestion();
+
+}
+
+
+
+/* =========================================
+   SEND QUESTION
+========================================= */
+
+function sendQuestion() {
+
+
+    const input =
+        document.getElementById(
+            "question"
+        );
+
+
+    const answer =
+        document.getElementById(
+            "answer"
+        );
+
+
+    const question =
+        input.value.trim().toLowerCase();
+
+
+
+    if (question === "") {
+
+        answer.textContent =
+            "Please enter a question.";
+
+        return;
+
+    }
+
+
+
+    answer.textContent =
+        "Analyzing supply-chain data...";
+
+
+
+    setTimeout(
+        function() {
+
+            generateAIAnswer(
+                question
+            );
+
+        },
+        500
+    );
+
+}
+
+
+
+/* =========================================
+   AI ANSWER GENERATOR
+========================================= */
+
+function generateAIAnswer(question) {
+
+
+    const answer =
+        document.getElementById(
+            "answer"
+        );
+
+
+
+    /* HIGH RISK */
+
+    if (
+        question.includes("highest risk") ||
+
+        question.includes("high risk")
+    ) {
+
+
+        let risky =
+            shipments.map(
+                shipment => {
+
+                    const risk =
+                        calculateRisk(
+                            shipment
+                        );
+
+                    return {
+
+                        ...shipment,
+
+                        risk_score:
+                            risk.score,
+
+                        risk_level:
+                            risk.level
+
+                    };
+
+                }
+            );
+
+
+
+        risky.sort(
+            (a,b) =>
+                b.risk_score -
+                a.risk_score
+        );
+
+
+
+        const top =
+            risky.slice(0,5);
+
+
+
+        let result =
+            "Top high-risk shipments:\n\n";
+
+
+
+        top.forEach(
+            item => {
+
+                result +=
+
+                    "• " +
+                    item.shipment_id +
+                    " - " +
+                    item.risk_level +
+                    " (Score: " +
+                    item.risk_score +
+                    ")\n";
+
+            }
+        );
+
+
+
+        answer.textContent =
+            result;
+
+
+
+        return;
+
+    }
+
+
+
+    /* IDLE FLEET */
+
+    if (
+        question.includes("idle") ||
+
+        question.includes("truck") ||
+
+        question.includes("fleet")
+    ) {
+
+
+        const idleAssets =
+            fleet.filter(
+                x =>
+                    x.status === "Idle"
+            );
+
+
+
+        let result =
+            "Available idle fleet assets:\n\n";
+
+
+
+        idleAssets.forEach(
+            asset => {
+
+                result +=
+
+                    "• " +
+                    asset.asset_id +
+                    " - " +
+                    asset.asset_type +
+                    " - " +
+                    asset.location +
+                    "\n";
+
+            }
+        );
+
+
+
+        answer.textContent =
+            result;
+
+
+
+        return;
+
+    }
+
+
+
+    /* COLD CHAIN */
+
+    if (
+        question.includes("cold") ||
+
+        question.includes("temperature")
+    ) {
+
+
+        const alerts =
+            temperatures.filter(
+                item =>
+
+                    item.temperature <
+                    item.min_temperature ||
+
+                    item.temperature >
+                    item.max_temperature
+            );
+
+
+
+        let result =
+            "Cold-chain alerts:\n\n";
+
+
+
+        if (
+            alerts.length === 0
+        ) {
+
+            result +=
+                "No temperature violations detected.";
+
+        }
+
+        else {
+
+            alerts.forEach(
+                item => {
+
+                    result +=
+
+                        "• Shipment " +
+                        item.shipment_id +
+                        " - " +
+                        item.temperature +
+                        "°C\n";
+
+                }
+            );
+
+        }
+
+
+
+        answer.textContent =
+            result;
+
+
+
+        return;
+
+    }
+
+
+
+    /* DISRUPTION */
+
+    if (
+        question.includes("disruption") ||
+
+        question.includes("affected")
+    ) {
+
+
+        const affected =
+            shipments.filter(
+                x =>
+                    x.disruption_id !== ""
+            );
+
+
+
+        let result =
+
+            "Active disruptions: " +
+            disruptions.length +
+            "\n" +
+
+            "Affected shipments: " +
+            affected.length +
+            "\n\n";
+
+
+
+        affected.forEach(
+            shipment => {
+
+                result +=
+
+                    "• " +
+                    shipment.shipment_id +
+                    " - " +
+                    shipment.origin +
+                    " → " +
+                    shipment.destination +
+                    "\n";
+
+            }
+        );
+
+
+
+        answer.textContent =
+            result;
+
+
+
+        return;
+
+    }
+
+
+
+    /* REROUTING */
+
+    if (
+        question.includes("reroute") ||
+
+        question.includes("route")
+    ) {
+
+
+        answer.textContent =
+
+            "Recommended action:\n\n" +
+
+            "1. Prioritize CRITICAL shipments.\n" +
+
+            "2. Move affected shipments to alternate routes.\n" +
+
+            "3. Assign available idle fleet assets.\n" +
+
+            "4. Closely monitor cold-chain shipments.\n" +
+
+            "5. Escalate temperature violations immediately.";
+
+
+
+        return;
+
+    }
+
+
+
+    /* RECOMMENDATION */
+
+    if (
+        question.includes("recommend") ||
+
+        question.includes("what should")
+    ) {
+
+
+        answer.textContent =
+
+            "ChainGuard AI Recommendation:\n\n" +
+
+            "• Prioritize SH-1003 and SH-1007.\n" +
+
+            "• Monitor SH-1005 closely because of severe weather.\n" +
+
+            "• Deploy idle refrigerated trucks for cold-chain shipments.\n" +
+
+            "• Reroute shipments affected by active disruptions.\n" +
+
+            "• Immediately investigate temperature violations.";
+
+
+
+        return;
+
+    }
+
+
+
+    /* DEFAULT */
+
+    answer.textContent =
+
+        "I can help analyze your supply chain.\n\n" +
+
+        "Try asking:\n" +
+
+        "• Which shipments are at highest risk?\n" +
+
+        "• Which trucks are idle?\n" +
+
+        "• Show me cold-chain violations.\n" +
+
+        "• Which shipments are affected by disruption?\n" +
+
+        "• What should we reroute first?";
+
+}
+
+
+
+/* =========================================
+   ENTER KEY
+========================================= */
+
+function handleEnter(event) {
+
+
+    if (
+        event.key === "Enter"
+    ) {
+
+        sendQuestion();
+
+    }
+
+}
+
+
+
+/* =========================================
+   START APPLICATION
+========================================= */
+
+loadDashboard();
+
+loadShipments();
+
+
+</script></body></html>
